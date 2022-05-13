@@ -1,10 +1,13 @@
 import pickle
 import numpy as np
+import tensorflow as tf
+import keras
 
-EURUSD_1hour_MA_model = pickle.load(open("finalized_model.sav",'rb'))
+EURUSD_1hour_MA_model = tf.keras.models.load_model("finalized_model.sav")
 
 
-def MultiStep(test,model,steps = 1):
+
+def MultiStep(test,model,window_size,steps = 1):
   y_pred = []
   step_pred = 0
   len = 0
@@ -30,5 +33,5 @@ def MultiStep(test,model,steps = 1):
   y_pred = np.reshape(y_pred,(len,steps))
   return y_pred
 
-def EURUSD_1hour_MA_predict(window):
-  MultiStep(window, 10, EURUSD_hourly_MA_model)
+def EURUSD_1hour_MA_predict(window,model):
+   MultiStep(window, model,10)

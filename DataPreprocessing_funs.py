@@ -1,6 +1,8 @@
 import pandas as pd
-
-
+import pickle
+import numpy as np
+import tensorflow
+import pandas as pd
 EURUSD_1hour_MA_scaler = pickle.load(open("scaler.bin",'rb'))
 
 def scaledReturn_MA(df,MA_windowSize = 14):
@@ -14,16 +16,17 @@ def scaledReturn_MA(df,MA_windowSize = 14):
     df = df.reset_index()
     df = df.drop("index", axis=1)
     df["scaled_return"] = EURUSD_1hour_MA_scaler.fit_transform(df[['Returns']].values)
+
     finaldf = df.drop(['high','low'],inplace=True, axis=1)
     final = df['scaled_return'].values
     last_MA = df['MA'].iloc[-1]
     return final,last_MA
 
 def scaledReturn_to_MA(prediction,lastMA):
-    # add conditions to know which scaler to use
+    #add conditions to know which scaler to use
     unscaled = EURUSD_1hour_MA_scaler.inverse_transform(prediction)
     MA_pred = []
-    MA_pred.apend(np.exp(unscaled[0])*lastMA)
+    MA_pred.append(np.exp(unscaled[0])*lastMA)
     for i in range(1,len(prediction)):
         MA_pred.append(np.exp(unscaled[i]) * MA_pred[i-1])
     return MA_pred
