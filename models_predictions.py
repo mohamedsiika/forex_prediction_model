@@ -12,8 +12,7 @@ def MultiStep(test,model,window_size,steps = 1):
   step_pred = 0
   len = 0
   window_pred = []
-
-  if(test.shape == (window_size,1)):      # to handle whether one window or several
+  if(test.shape == (window_size,)):      # to handle whether one window or several
     window = test
     len = 1
   else:
@@ -30,8 +29,8 @@ def MultiStep(test,model,window_size,steps = 1):
     y_pred.append(window_pred)
     window_pred = []
   y_pred = np.array(y_pred)
-  y_pred = np.reshape(y_pred,(len,steps))
+  y_pred = np.reshape(y_pred,(steps,len))
   return y_pred
 
 def EURUSD_1hour_MA_predict(window,model):
-   MultiStep(window, model,10)
+   return MultiStep(window,model,64,10)
