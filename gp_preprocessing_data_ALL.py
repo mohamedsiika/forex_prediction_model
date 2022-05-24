@@ -11,8 +11,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import linregress
-import plotly.express as px
-import plotly.graph_objects as go
+
 from datetime import datetime
 import matplotlib.pyplot as plt
 from scipy.signal import argrelextrema
@@ -31,10 +30,8 @@ df.head()
 
 df['MA'] = df['HLAvg'].rolling(window=14).mean()    # We chose 14 as this is the default period used in most technical analysis tools
             # Because the window = 14 ... the first 13 row in MA will be NaN and then they will have a value .. So we may delete them
-df
 
 df['Returns'] = np.log(df['MA']/df['MA'].shift(1))
-df
 
 df=df.dropna()
 
@@ -45,14 +42,12 @@ df=df.drop("index",axis=1)
 
 batch_size=32
 reminder=df.shape[0]%batch_size
-print(reminder)
 df=df.drop(df.index[:reminder])
-df
 
 df=df.reset_index()
 df=df.drop("index",axis=1)
 df=df.set_index("time")
-df
+
 
 from sklearn.preprocessing import MinMaxScaler
 
@@ -61,26 +56,21 @@ df["scaled_return"]= scaler.fit_transform(df[['Returns']].values)
 
 pickle.dump(scaler,open("scaler.bin",'wb'))
 
-df
 
 df.to_excel("final_df.xlsx")
 
 features=df.drop(["open","high","low","HLAvg","MA","Returns","close","tick_volume"],axis=1)
 
 train_size=int((0.8*df.shape[0])-((0.8*df.shape[0])% batch_size))
-print(train_size)
 test_size=(df.shape[0]-train_size)//2
-print(test_size)
 
 val_size=(df.shape[0]-train_size)//2
-print(val_size)
 
 window_size=2*batch_size #64 hours
 df_train = features[:- val_size - test_size]
 df_val = features[- val_size - test_size - window_size:- test_size]
 df_test = features[- test_size - window_size:]
 
-df_test
 
 def features_labels1(values):
   x,y=[],[]
@@ -108,7 +98,6 @@ def features_labels2(df):
 x_train,y_train=features_labels1(features[['scaled_return']].values)
 x_val,y_val=features_labels1(df_val[['scaled_return']].values)
 
-x_train.shape
 
 model = keras.models.Sequential()
 model.add(layers.LSTM(76, input_shape=(x_train.shape[1], 1), return_sequences = False))
@@ -121,7 +110,6 @@ model.fit(x=x_train, y=y_train ,epochs=50,batch_size=32,validation_data=(x_val,y
 
 y_pred=model.predict(x_train)
 
-len(np.unique(y_pred))/len(y_pred)
 
 filename = 'finalized_model.sav'
 pickle.dump(model, open(filename, 'wb'))

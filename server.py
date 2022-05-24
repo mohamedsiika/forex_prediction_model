@@ -5,6 +5,8 @@ import threading
 from models_predictions import *
 from DataPreprocessing_funs import *
 
+
+
 port=5050
 SERVER=socket.gethostbyname(socket.gethostname()) #gets the ip server
 ADDR=(SERVER,port)
@@ -32,14 +34,10 @@ def handle_client(conn,addr):
     connected=True
     while connected:
         msg=pickle.loads(conn.recv(10000))
-
-        '''
-            add another msg (DataNature),conditions to know the nature of the data
-            to use the appropriate model 
-        '''
         msg=pd.DataFrame(msg)
         ma=predict_MA_direction(msg)
         print('predict_moving=',ma)
+        break
     conn.close()
 
 def start():
