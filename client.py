@@ -3,9 +3,12 @@ import socket
 import MetaTrader5 as mt5
 from datetime import datetime, timedelta
 import pytz
+import time
 import pandas as pd
+from MA_action_funs import *
+from DataPreprocessing_funs import *
+import matplotlib.pyplot as plt
 
-mt5.Sell()
 def initialize_meta():
     if not mt5.initialize():
         print("initialize() failed, error code =", mt5.last_error())
@@ -19,14 +22,27 @@ def get_data():
     # print(now)
     # print(from_date)
 
-    df = pd.DataFrame(mt5.copy_rates_from_pos('EURUSD', mt5.TIMEFRAME_H1, 0, 78))
+    df = pd.DataFrame(mt5.copy_rates_from_pos('EURUSD', mt5.TIMEFRAME_H1, 22, 78))
     df['time'] = pd.to_datetime(df['time'], unit='s')
+
+    test = pd.DataFrame(mt5.copy_rates_from_pos('EURUSD', mt5.TIMEFRAME_H1, 11, 78))
+    test['time'] = pd.to_datetime(test['time'], unit='s')
+
+    w,_,T=scaledReturn_MA(test)
+
+    print(T.tail(10))
+
+    plt.plot(T['MA'][-10:], color='red', label='actual', alpha=0.5)
+    plt.xlabel('time')
+
+    plt.title('True')
+    plt.show()
 
     return df
 
 
 def account_login(accountID):
-    authorized = mt5.login(login=accountID, password="dezjrca7", server="MetaQuotes-Demo")
+    authorized = mt5.login(login=accountID, password="lwnljii8", server="MetaQuotes-Demo")
     if authorized:
         # display trading account data 'as is'
         print(mt5.account_info())
@@ -41,7 +57,7 @@ def account_login(accountID):
         return None
 
 
-account_id = 59238033
+account_id = 5003644199
 initialize_meta()
 df = get_data()
 account = account_login(account_id)
@@ -63,6 +79,45 @@ client.connect(ADDR)
 def send_msg(msg):
     message = msg
     client.send(message)
+    msg=client.recv(1000)
+    while msg:
+        print('Received:' + msg.decode())
+        trade,sl,tp=Action(1.06993,msg)
+        print(trade)
+        if trade!="no_action":
+            if trade=="buy":
+                trade_type=mt5.ORDER_TYPE_BUY
+            else:
+                trade_type=mt5.ORDER_TYPE_SELL
+
+            buy_request = {
+                "action": mt5.TRADE_ACTION_DEAL,
+                "symbol": "EURUSD",
+                "volume": 0.1,
+                "type": trade_type,
+                "price": 1.06993,
+                "sl": sl,
+                "tp": tp,
+                "comment": "sent by python",
+
+            }
+
+            result = mt5.order_send(buy_request)
+            print(result)
+            print(sl,tp)
+
+
+
+
+
+        msg = client.recv(1024)
+
+
+
+
+
+
+
 
 
 send_msg(pickle.dumps(df,protocol=4))
