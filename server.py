@@ -22,7 +22,7 @@ DISCONNECT_MSG='!DISCONNECTED'
 
 def predict_MA_direction(msg,DataNature=None):
     # add conditions for DataNature to specify the model
-    window,lastma,_ = scaledReturn_MA(msg)
+    window,lastma= scaledReturn_MA(msg)
     pred_MA = EURUSD_1hour_MA_predict(window,EURUSD_1hour_MA_model)# Predict scaled return
     pred_MA = scaledReturn_to_MA(pred_MA,lastma)          # Convert it back to MA
     '''

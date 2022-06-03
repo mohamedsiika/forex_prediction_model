@@ -19,7 +19,7 @@ def scaledReturn_MA(df,MA_windowSize = 14):
     finaldf = df.drop(['high','low'],inplace=True, axis=1)
     final = df['scaled_return'].values
     last_MA = df['MA'].iloc[-1]
-    return final,last_MA,df
+    return final,last_MA
 
 def scaledReturn_to_MA(prediction,lastMA):
     #add conditions to know which scaler to use

@@ -25,19 +25,6 @@ def get_data():
     df = pd.DataFrame(mt5.copy_rates_from_pos('EURUSD', mt5.TIMEFRAME_H1, 22, 78))
     df['time'] = pd.to_datetime(df['time'], unit='s')
 
-    test = pd.DataFrame(mt5.copy_rates_from_pos('EURUSD', mt5.TIMEFRAME_H1, 11, 78))
-    test['time'] = pd.to_datetime(test['time'], unit='s')
-
-    w,_,T=scaledReturn_MA(test)
-
-    print(T.tail(10))
-
-    plt.plot(T['MA'][-10:], color='red', label='actual', alpha=0.5)
-    plt.xlabel('time')
-
-    plt.title('True')
-    plt.show()
-
     return df
 
 
