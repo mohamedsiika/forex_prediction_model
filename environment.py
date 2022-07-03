@@ -20,32 +20,36 @@ HOLD = 2
 
 class OhlcvEnv(gym.Env):
 
-    def __init__(self, window_size, path, show_trade=True):
+    def __init__(self, window_size, path=None, show_trade=True,test_data=pd.DataFrame()):
+
         self.show_trade = show_trade
         self.path = path
         self.actions = ["LONG", "SHORT", "FLAT"]
-        self.fee = 0.0005
         self.seed()
         self.file_list = []
         # load_csv
+        self.test_data=test_data
+
         self.load_from_excel()
 
         # n_features
         self.window_size = window_size
         self.n_features = self.df.shape[1]
         self.shape = (self.window_size, self.n_features+4)
-
         # defines action space
         self.action_space = spaces.Discrete(len(self.actions))
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=self.shape, dtype=np.float32)
 
     def load_from_excel(self):
-        if(len(self.file_list) == 0):
-            self.file_list = [x.name for x in Path(self.path).iterdir() if x.is_file()]
-            self.file_list.sort()
-        self.rand_episode = self.file_list.pop()
-        raw_df= pd.read_excel(self.path + self.rand_episode)
-        _,_,self.df = DataPreprocessing_funs.scaledReturn_MA(raw_df)
+        if self.test_data.empty:
+                if(len(self.file_list) == 0):
+                    self.file_list = [x.name for x in Path(self.path).iterdir() if x.is_file()]
+                    self.file_list.sort()
+                self.rand_episode = self.file_list.pop()
+                raw_data= pd.read_excel(self.path + self.rand_episode)
+                self.test_data=raw_data
+
+        _,_,self.df = DataPreprocessing_funs.scaledReturn_MA(self.test_data)
 
         ## selected manual fetuares
 
@@ -84,8 +88,8 @@ class OhlcvEnv(gym.Env):
                 self.position = FLAT  # update position to flat
                 self.action = BUY # record action as buy
                 self.exit_price = self.closingPrice
-                self.reward += ((self.entry_price - self.exit_price)/self.exit_price + 1)*(1-self.fee)**2 - 1 # calculate reward
-                self.krw_balance = self.krw_balance * (1.0 + self.reward) # evaluate cumulative return in krw-won
+                self.reward += ((self.entry_price - self.exit_price))*1000 # calculate reward
+                self.current_balance = self.current_balance +self.reward # evaluate cumulative return in krw-won
                 self.entry_price = 0 # clear entry price
                 self.n_short += 1 # record number of short
         elif action == 1: # vice versa for short trade
@@ -97,25 +101,24 @@ class OhlcvEnv(gym.Env):
                 self.position = FLAT
                 self.action = 1
                 self.exit_price = self.closingPrice
-                self.reward += ((self.exit_price - self.entry_price)/self.entry_price + 1)*(1-self.fee)**2 - 1
-                self.krw_balance = self.krw_balance * (1.0 + self.reward)
+                self.reward += ((self.exit_price - self.entry_price))*1000
+                self.current_balance = self.current_balance + self.reward
                 self.entry_price = 0
                 self.n_long += 1
 
         # [coin + krw_won] total value evaluated in krw won
         if(self.position == LONG):
-            temp_reward = ((self.closingPrice - self.entry_price)/self.entry_price + 1)*(1-self.fee)**2 - 1
-            new_portfolio = self.krw_balance * (1.0 + temp_reward)
+            temp_reward = (self.closingPrice - self.entry_price)*1000
+            new_portfolio = self.current_balance +temp_reward
         elif(self.position == SHORT):
-            temp_reward = ((self.entry_price - self.closingPrice)/self.closingPrice + 1)*(1-self.fee)**2 - 1
-            new_portfolio = self.krw_balance * (1.0 + temp_reward)
+            temp_reward = ((self.entry_price - self.closingPrice))*1000
+            new_portfolio = self.current_balance + temp_reward
         else:
-            temp_reward = 0
-            new_portfolio = self.krw_balance
+            new_portfolio = self.current_balance
 
         self.portfolio = new_portfolio
         self.current_tick += 1
-        if(self.show_trade and self.current_tick%100 == 0):
+        if(self.show_trade and self.current_tick%500 == 0):
             print("Tick: {0}/ Portfolio (USD): {1}".format(self.current_tick, self.portfolio))
             print("Long: {0}/ Short: {1}".format(self.n_long, self.n_short))
         self.history.append((self.action, self.current_tick, self.closingPrice, self.portfolio, self.reward))
@@ -130,9 +133,9 @@ class OhlcvEnv(gym.Env):
 
     def get_profit(self):
         if(self.position == LONG):
-            profit = ((self.closingPrice - self.entry_price)/self.entry_price + 1)*(1-self.fee)**2 - 1
+            profit = ((self.closingPrice - self.entry_price))*1000
         elif(self.position == SHORT):
-            profit = ((self.entry_price - self.closingPrice)/self.closingPrice + 1)*(1-self.fee)**2 - 1
+            profit = ((self.entry_price - self.closingPrice))*1000
         else:
             profit = 0
         return profit
@@ -140,7 +143,7 @@ class OhlcvEnv(gym.Env):
     def reset(self):
         # self.current_tick = random.randint(0, self.df.shape[0]-1000)
         self.current_tick = 0
-        print("start episode ... {0} at {1}" .format(self.rand_episode, self.current_tick))
+       # print("start episode ... {0} at {1}" .format(self.rand_episode, self.current_tick))
 
         # positions
         self.n_long = 0
@@ -148,8 +151,8 @@ class OhlcvEnv(gym.Env):
 
         # clear internal variables
         self.history = [] # keep buy, sell, hold action history
-        self.krw_balance = 1000 # initial balance, u can change it to whatever u like
-        self.portfolio = float(self.krw_balance) # (coin * current_price + current_krw_balance) == portfolio
+        self.current_balance = 1000 # initial balance, u can change it to whatever u like
+        self.portfolio = float(self.current_balance) # (coin * current_price + current_current_balance) == portfolio
         self.profit = 0
 
         self.action = HOLD

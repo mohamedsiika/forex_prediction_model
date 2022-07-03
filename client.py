@@ -9,6 +9,7 @@ from MA_action_funs import *
 from DataPreprocessing_funs import *
 import matplotlib.pyplot as plt
 
+
 def initialize_meta():
     if not mt5.initialize():
         print("initialize() failed, error code =", mt5.last_error())
