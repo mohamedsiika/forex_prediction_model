@@ -49,7 +49,7 @@ class trader():
         PATH_TRAIN = "./data/train/"
         PATH_TEST = "./data/test/"
         self.env = OhlcvEnv(TIME_STEP, path=PATH_TRAIN)
-        self.env_test = OhlcvEnv(TIME_STEP, path=PATH_TEST)
+        #self.env_test = OhlcvEnv(TIME_STEP, path=PATH_TEST)
 
         # random seed
         np.random.seed(456)
@@ -87,7 +87,6 @@ class trader():
         # train
         self.dqn.fit(self.env, nb_steps=300000, nb_max_episode_steps=100000, visualize=True, verbose=2)
         self.dqn.save_weights('./model/duel_dqn.h5f', overwrite=True)
-        keras.models.save_model(self.dqn,"./model/duel_dqn.h5f")
         """try:
             # validate
             info = dqn.test(env_test, nb_episodes=1, visualize=False)
