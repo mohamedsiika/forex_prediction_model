@@ -1,14 +1,12 @@
-
+import pandas as pd
 import matplotlib.pyplot as plt
 import socket
 import threading
-from models_predictions import *
-from DataPreprocessing_funs import *
 from MA_action_funs import *
+from models_retrain import *
 
 
-
-port=5050
+port=7070
 SERVER=socket.gethostbyname(socket.gethostname()) #gets the ip server
 ADDR=(SERVER,port)
 
@@ -42,12 +40,25 @@ def handle_client(conn,addr):
     while connected:
         msg=pickle.loads(conn.recv(10000))
         msg=pd.DataFrame(msg)
+        thereIs = 0
+        check_update()
+        if(UpdateIsNeeded()):
+            thereIs = 1
+            print(" >>> Models are out of date ! ")
+            conn.send(str(thereIs).encode())
+            conn.send(str(updatingDataNeeded).encode())
+            UpdatingData = pickle.loads(conn.recv(1000000))
+            UpdatingData = pd.DataFrame(UpdatingData)
+            print(UpdatingData)
+            update_models(UpdatingData)
+            print(" >>> Models are updated successfully. ")
+        else:
+            conn.send(str(thereIs).encode())
         change=str(predict_MA_direction(msg)).encode()
         print('predict_moving=',change)
         conn.send(change)
         connected=False
 
-    print("out")
     conn.close()
 
 def start():

@@ -1,7 +1,6 @@
-import pickle
 import numpy as np
 import tensorflow as tf
-import keras
+
 
 EURUSD_1hour_MA_model = tf.keras.models.load_model("finalized_model.sav")
 
