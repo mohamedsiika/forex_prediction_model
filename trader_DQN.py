@@ -43,20 +43,20 @@ class NormalizerProcessor(Processor):
 class trader():
     def __init__(self):
         ENV_NAME = 'OHLCV-v0'
-        TIME_STEP = 10
+        TIME_STEP = 64
 
         # Get the environment and extract the number of actions.
-        PATH_TRAIN = "./data/train/"
-        PATH_TEST = "./data/test/"
-        self.env = OhlcvEnv(TIME_STEP, path=PATH_TRAIN)
+        #PATH_TRAIN = "./data/train/"
+        #PATH_TEST = "./data/test/"
+        #self.env = OhlcvEnv(TIME_STEP, path=PATH_TRAIN)
         #self.env_test = OhlcvEnv(TIME_STEP, path=PATH_TEST)
 
         # random seed
         np.random.seed(456)
-        self.env.seed(562)
+        #self.env.seed(562)
 
-        self.nb_actions = self.env.action_space.n
-        self.model = self.create_model(shape=self.env.shape, nb_actions=self.nb_actions)
+        #self.nb_actions = self.env.action_space.n
+        self.model = self.create_model(shape=(64,9), nb_actions=3)
         print(self.model.summary())
 
         # Finally, we configure and compile our agent. You can use every built-in Keras optimizer and even the metrics!
@@ -65,7 +65,7 @@ class trader():
         self.policy = EpsGreedyQPolicy()
         # enable the dueling network
         # you can specify the dueling_type to one of {'avg','max','naive'}-+
-        self.dqn = DQNAgent(model=self.model, nb_actions=self.nb_actions, memory=self.memory, nb_steps_warmup=2000,
+        self.dqn = DQNAgent(model=self.model, nb_actions=3, memory=self.memory, nb_steps_warmup=2000,
                             enable_dueling_network=True, dueling_type='avg', target_model_update=1e-2,
                             policy=self.policy,
                             processor=NormalizerProcessor())
