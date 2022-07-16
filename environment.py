@@ -1,4 +1,4 @@
-import DataPreprocessing_funs
+from DataPreprocessing_funs import DataPreprocessing
 import pandas as pd
 import random
 import gym
@@ -29,6 +29,7 @@ class OhlcvEnv(gym.Env):
         self.file_list = []
         # load_csv
         self.test_data=test_data
+        self.DP=DataPreprocessing()
 
         self.load_from_excel()
 
@@ -48,14 +49,14 @@ class OhlcvEnv(gym.Env):
                 self.rand_episode = self.file_list.pop()
                 raw_data= pd.read_excel(self.path + self.rand_episode)
                 self.test_data=raw_data
-
-        _,_,self.df = DataPreprocessing_funs.scaledReturn_MA(self.test_data)
+        print("aanaaaaaaaaa")
+        _,_,self.df =self.DP.scaledReturn_MA(self.test_data)
 
         ## selected manual fetuares
 
         self.df.dropna(inplace=True) # drops Nan rows
         self.closingPrices = self.df['close'].values
-        self.df = self.df[['close','HLAvg','MA',"tick_volume",'scaled_return']].values
+        self.df = self.df[['close','MA',"tick_volume",'scaled_return','change']].values
 
     def render(self, mode='human', verbose=False):
         return None

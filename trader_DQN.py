@@ -42,18 +42,19 @@ class NormalizerProcessor(Processor):
 
 class trader():
     def __init__(self):
+        print("heeeeeeeeeeey")
         ENV_NAME = 'OHLCV-v0'
         TIME_STEP = 64
 
         # Get the environment and extract the number of actions.
-        #PATH_TRAIN = "./data/train/"
+        PATH_TRAIN = "./data/train/"
         #PATH_TEST = "./data/test/"
-        #self.env = OhlcvEnv(TIME_STEP, path=PATH_TRAIN)
+        self.env = OhlcvEnv(TIME_STEP, path=PATH_TRAIN)
         #self.env_test = OhlcvEnv(TIME_STEP, path=PATH_TEST)
 
         # random seed
         np.random.seed(456)
-        #self.env.seed(562)
+        self.env.seed(562)
 
         #self.nb_actions = self.env.action_space.n
         self.model = self.create_model(shape=(64,9), nb_actions=3)
@@ -83,10 +84,10 @@ class trader():
         model.add(Dense(nb_actions, activation='linear'))
         return model
     
-    def main(self):
+    def fit(self):
         # train
-        self.dqn.fit(self.env, nb_steps=300000, nb_max_episode_steps=100000, visualize=True, verbose=2)
-        self.dqn.save_weights('./model/duel_dqn.h5f', overwrite=True)
+        self.dqn.fit(self.env, nb_steps=300000, nb_max_episode_steps=150000, visualize=True, verbose=2)
+        self.dqn.save_weights('./model/final_DQN.h5f', overwrite=True)
         """try:
             # validate
             info = dqn.test(env_test, nb_episodes=1, visualize=False)
@@ -101,5 +102,6 @@ class trader():
         except KeyboardInterrupt:
             continue"""
 if __name__ == '__main__':
+    print("hello")
     x=trader()
-    x.main()
+    x.fit()

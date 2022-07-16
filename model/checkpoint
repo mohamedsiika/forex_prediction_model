@@ -1,2 +1,2 @@
-model_checkpoint_path: "duel_dqn.h5f"
-all_model_checkpoint_paths: "duel_dqn.h5f"
+model_checkpoint_path: "final_DQN.h5f"
+all_model_checkpoint_paths: "final_DQN.h5f"
