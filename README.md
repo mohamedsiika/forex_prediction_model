@@ -1,1 +1,0 @@
-# forex_prediction_model
