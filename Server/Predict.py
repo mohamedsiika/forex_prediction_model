@@ -20,7 +20,7 @@ class Predict():
 
         profit = self.df['profit'].values.reshape(64, 1)
         encoder_positions = np.array(encoder_positions)
-        prices = self.df[['close', 'HLAvg', 'MA', "tick_volume", 'scaled_return']].values
+        prices = self.df[['close','MA',"tick_volume",'scaled_return','change']].values
         prices = np.concatenate((prices, encoder_positions, profit), axis=1)
         action = self.trader.dqn.model.predict(np.array([prices]))
 
