@@ -5,11 +5,11 @@ import requests
 import numpy as np
 from streamlit import cli as stlci
 import schedule
+
 import time
 import threading
 import os
-from dashboard import*
-
+from dashboard import *
 
 
 def initialize_meta():
@@ -91,6 +91,7 @@ def updating_models_data(req):
 
 
 def trade():
+    get_data()
     df = pd.read_csv('client_info.csv')
     df = df.iloc[-141:]
     dataset = df.to_dict(orient='list')
@@ -109,8 +110,11 @@ def trade():
                 "symbol": "EURUSD",
                 "volume": 0.01,
                 "type": trade_type,
+                "price":mt5.symbol_info_tick('EURUSD').ask,
                 "comment": "sent by Barter",
             }
+            result=mt5.order_send(buy_request)
+
             print("BUY")
 
         elif mt5.positions_get()[0].type == 1:
@@ -120,9 +124,12 @@ def trade():
                 "symbol": "EURUSD",
                 "volume": 0.01,
                 "type": trade_type,
+                "price": mt5.symbol_info_tick('EURUSD').ask,
+
                 "comment": "sent by Barter",
                 "position": mt5.positions_get()[0].ticket
             }
+            result=mt5.order_send(buy_request)
             print("SELL CLOSE")
 
 
@@ -136,8 +143,11 @@ def trade():
                 "symbol": "EURUSD",
                 "volume": 0.01,
                 "type": trade_type,
+                "price": mt5.symbol_info_tick('EURUSD').bid,
+
                 "comment": "sent by Barter",
             }
+            result=mt5.order_send(buy_request)
             print("BUY")
 
         elif mt5.positions_get()[0].type == 0:
@@ -147,13 +157,17 @@ def trade():
                 "symbol": "EURUSD",
                 "volume": 0.01,
                 "type": trade_type,
+                "price":mt5.symbol_info_tick('EURUSD').bid,
                 "comment": "sent by Barter",
                 "position": mt5.positions_get()[0].ticket
             }
+            result=mt5.order_send(buy_request)
             print("BUY CLOSE")
 
     else:
         print("HOLD")
+    print(result)
+
 
     # get_update_need_url = "https://forex-app-fudn2.ondigitalocean.app/dataUpdate"
     get_update_need_url = "http://127.0.0.1:5000/dataUpdate"
@@ -180,9 +194,9 @@ def trade_every_hour():
         schedule.run_pending()
         time.sleep(1)
 
+
 if __name__ == '__main__':
     trade()
     thread = threading.Thread(target=trade_every_hour)
     thread.start()
-    os.system('cmd /c "streamlit run "E:/Study/University/FourthYear/Second Term/GP/Client/dashboard.py""')
-
+    os.system('cmd /c "streamlit run dashboard.py"')
