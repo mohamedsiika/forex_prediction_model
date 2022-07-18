@@ -5,6 +5,7 @@ import requests
 import numpy as np
 from streamlit import cli as stlci
 import schedule
+import pathlib
 
 import time
 import threading
@@ -166,7 +167,6 @@ def trade():
 
     else:
         print("HOLD")
-    print(result)
 
 
     # get_update_need_url = "https://forex-app-fudn2.ondigitalocean.app/dataUpdate"
@@ -196,7 +196,15 @@ def trade_every_hour():
 
 
 if __name__ == '__main__':
+    t=str(pathlib.Path().resolve())
+    # t.replace(r"\\","/")
+    t = re.sub(r"\\", '/', t)
+    print(t)
     trade()
     thread = threading.Thread(target=trade_every_hour)
     thread.start()
-    os.system('cmd /c "streamlit run dashboard.py"')
+    os.system(f'cmd /c python -m streamlit run "{t}/dashboard.py"')
+    #os.system(f'cmd /c python -m streamlit run "F:/siika/forex/final Project/Client/dashboard.py"')
+
+
+    print(f'cmd /c streamlit run "{t}/dashboard.py"')
