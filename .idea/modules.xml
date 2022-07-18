@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/.idea/forex_prediction_model.iml" filepath="$PROJECT_DIR$/.idea/forex_prediction_model.iml" />
+=======
+      <module fileurl="file://$PROJECT_DIR$/.idea/main.iml" filepath="$PROJECT_DIR$/.idea/main.iml" />
+>>>>>>> origin/main
     </modules>
   </component>
 </project>
